@@ -1,18 +1,30 @@
-package fr.renaudboulard.android.dagger2;
+package fr.renaudboulard.android.dagger2.activity;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.List;
 
+import fr.renaudboulard.android.dagger2.R;
+import fr.renaudboulard.android.dagger2.model.Repo;
+import fr.renaudboulard.android.dagger2.service.GitHubService;
+import retrofit.Call;
+import retrofit.Callback;
+import retrofit.GsonConverterFactory;
+import retrofit.Response;
+import retrofit.Retrofit;
 
+public class MainActivity extends AppCompatActivity implements Callback<List<Repo>> {
+
+    public static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +41,17 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.github.com/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        GitHubService service = retrofit.create(GitHubService.class);
+
+        Call<List<Repo>> call = service.listRepos("renaudboulard");
+        call.enqueue(this);
+
 
     }
 
@@ -52,5 +75,17 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onResponse(Response<List<Repo>> response, Retrofit retrofit) {
+        for (Repo repo : response.body()) {
+            Log.i(TAG, repo.getName());
+        }
+    }
+
+    @Override
+    public void onFailure(Throwable t) {
+        Toast.makeText(MainActivity.this, t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
     }
 }
