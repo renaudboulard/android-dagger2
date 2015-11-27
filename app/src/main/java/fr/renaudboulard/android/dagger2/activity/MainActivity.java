@@ -25,6 +25,8 @@ import retrofit.Retrofit;
 public class MainActivity extends AppCompatActivity implements Callback<List<Repo>> {
 
     public static final String TAG = "MainActivity";
+    public static final String URL = "https://api.github.com/";
+    public static final String USER = "renaudboulard";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,13 +45,13 @@ public class MainActivity extends AppCompatActivity implements Callback<List<Rep
         });
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.github.com/")
+                .baseUrl(URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         GitHubService service = retrofit.create(GitHubService.class);
 
-        Call<List<Repo>> call = service.listRepos("renaudboulard");
+        Call<List<Repo>> call = service.listRepos(USER);
         call.enqueue(this);
 
 
