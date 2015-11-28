@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -14,6 +16,7 @@ import android.widget.Toast;
 import java.util.List;
 
 import fr.renaudboulard.android.dagger2.R;
+import fr.renaudboulard.android.dagger2.adapter.RepoAdapter;
 import fr.renaudboulard.android.dagger2.model.Repo;
 import fr.renaudboulard.android.dagger2.service.GitHubService;
 import retrofit.Call;
@@ -27,6 +30,12 @@ public class MainActivity extends AppCompatActivity implements Callback<List<Rep
     public static final String TAG = "MainActivity";
     public static final String URL = "https://api.github.com/";
     public static final String USER = "renaudboulard";
+
+
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +62,18 @@ public class MainActivity extends AppCompatActivity implements Callback<List<Rep
 
         Call<List<Repo>> call = service.listRepos(USER);
         call.enqueue(this);
+
+        mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        mRecyclerView.setHasFixedSize(true);
+
+        // use a linear layout manager
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
+
 
 
     }
@@ -81,6 +102,9 @@ public class MainActivity extends AppCompatActivity implements Callback<List<Rep
 
     @Override
     public void onResponse(Response<List<Repo>> response, Retrofit retrofit) {
+        // specify an adapter (see also next example)
+        mAdapter = new RepoAdapter(response.body());
+        mRecyclerView.setAdapter(mAdapter);
         for (Repo repo : response.body()) {
             Log.i(TAG, repo.getName());
         }
